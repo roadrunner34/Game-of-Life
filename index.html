@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Life</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Conway's Game of Life</h1>
+        
+        <div class="controls">
+            <button id="start-pause">Start</button>
+            <button id="faster">Faster</button>
+            <button id="slower">Slower</button>
+        </div>
+        
+        <div class="game-info">
+            <p>Click on cells to create or remove life. Each click affects 3 cells at once.</p>
+            <p>The grid has walls - cells don't wrap around the edges.</p>
+            <p>Speed: <span id="speed-display">1x</span></p>
+        </div>
+        
+        <div class="grid-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html> 
