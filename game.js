@@ -164,25 +164,74 @@ document.addEventListener('DOMContentLoaded', () => {
         speedDisplay.textContent = `${config.speedMultiplier}x`;
     }
 
-    // Create a cell and its neighbors
+    // Create a cell group with 3 connected cells in a random pattern
     function createCellGroup(centerX, centerY) {
-        // Toggle the center cell
-        if (centerX >= 0 && centerX < config.gridWidth && centerY >= 0 && centerY < config.gridHeight) {
-            grid[centerY][centerX] = grid[centerY][centerX] ? 0 : 1;
+        // Check if center cell is within bounds
+        if (centerX < 0 || centerX >= config.gridWidth || centerY < 0 || centerY >= config.gridHeight) {
+            return;
         }
         
-        // Create two additional cells (to the right and below)
-        const rightX = centerX + 1;
-        const belowY = centerY + 1;
+        // Start with the center cell
+        grid[centerY][centerX] = 1;
         
-        // Add cell to the right if within bounds
-        if (rightX < config.gridWidth) {
-            grid[centerY][rightX] = grid[centerY][rightX] ? 0 : 1;
+        // Possible directions: up, right, down, left, up-right, down-right, down-left, up-left
+        const directions = [
+            [0, -1], [1, 0], [0, 1], [-1, 0], 
+            [1, -1], [1, 1], [-1, 1], [-1, -1]
+        ];
+        
+        // Shuffle the directions array to randomize the pattern
+        const shuffledDirections = [...directions].sort(() => Math.random() - 0.5);
+        
+        // Place the second cell in a random valid direction
+        let secondCellPlaced = false;
+        let secondCellX, secondCellY;
+        
+        for (const [dx, dy] of shuffledDirections) {
+            const newX = centerX + dx;
+            const newY = centerY + dy;
+            
+            if (newX >= 0 && newX < config.gridWidth && newY >= 0 && newY < config.gridHeight) {
+                grid[newY][newX] = 1;
+                secondCellX = newX;
+                secondCellY = newY;
+                secondCellPlaced = true;
+                break;
+            }
         }
         
-        // Add cell below if within bounds
-        if (belowY < config.gridHeight) {
-            grid[belowY][centerX] = grid[belowY][centerX] ? 0 : 1;
+        // If we couldn't place the second cell, return
+        if (!secondCellPlaced) return;
+        
+        // For the third cell, we need to ensure it touches at least one of the existing cells
+        // Get all valid positions that touch either the first or second cell
+        const validPositions = [];
+        
+        for (const [dx, dy] of directions) {
+            // Positions touching the first cell
+            const pos1X = centerX + dx;
+            const pos1Y = centerY + dy;
+            
+            // Positions touching the second cell
+            const pos2X = secondCellX + dx;
+            const pos2Y = secondCellY + dy;
+            
+            // Add positions that are within bounds and not already occupied
+            if (pos1X >= 0 && pos1X < config.gridWidth && pos1Y >= 0 && pos1Y < config.gridHeight && 
+                !(pos1X === centerX && pos1Y === centerY) && !(pos1X === secondCellX && pos1Y === secondCellY)) {
+                validPositions.push([pos1X, pos1Y]);
+            }
+            
+            if (pos2X >= 0 && pos2X < config.gridWidth && pos2Y >= 0 && pos2Y < config.gridHeight && 
+                !(pos2X === centerX && pos2Y === centerY) && !(pos2X === secondCellX && pos2Y === secondCellY)) {
+                validPositions.push([pos2X, pos2Y]);
+            }
+        }
+        
+        // If there are valid positions, randomly select one for the third cell
+        if (validPositions.length > 0) {
+            const [thirdX, thirdY] = validPositions[Math.floor(Math.random() * validPositions.length)];
+            grid[thirdY][thirdX] = 1;
         }
     }
 
@@ -198,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cellX = Math.floor(clickX / config.cellSize);
         const cellY = Math.floor(clickY / config.cellSize);
         
-        // Create a group of 3 cells instead of just toggling one
+        // Create a random pattern of 3 connected cells
         createCellGroup(cellX, cellY);
         drawGrid();
     }
